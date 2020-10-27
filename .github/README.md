@@ -56,6 +56,17 @@ This should run on any platform that can run Go 1.14 or later.
   ```
   This will start the server on port 80 for the user `codemicro`.
 
+### Reverse proxying
+
+To reverse proxy this using the Apache2 HTTP server:
+
+```
+<Location /a/path>
+    ProxyPass http://127.0.0.1:8000/
+    ProxyPassReverse http://127.0.0.1:8000/
+</Location>
+```
+
 ### Shields.io
 
 This service is designed to work as a JSON endpoint that can be used with Shields.io. Read more [here](https://shields.io/endpoint).
