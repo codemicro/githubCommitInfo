@@ -2,15 +2,31 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 
-	"github.com/codemicro/githubCommitInfo/internal/datasources"
+	"github.com/codemicro/githubCommitInfo/internal/endpoints"
+	"github.com/codemicro/githubCommitInfo/internal/shields"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cache"
 )
 
 func main() {
-	client := datasources.NewClient("e86aa6438a9f39efd1485340d19426ea24eda6a9")
-	num, err := client.GetAllCommits("codemicro")
-	if err != nil {
-		panic(err)
+	oauthToken := os.Getenv("GITHUB_OAUTH_TOKEN")
+
+	if oauthToken == "" {
+		fmt.Println("GITHUB_OAUTH_TOKEN envirnoment variable not set.")
+		os.Exit(1)
 	}
-	fmt.Println(*num)
+
+	app := fiber.New(fiber.Config{
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			fmt.Println(err)
+			return c.Status(fiber.StatusInternalServerError).JSON(shields.NewShield(c.Locals("fieldName").(string), "Unavailable", "red"))
+		},
+	})
+
+	app.Get("/", cache.New(), endpoints.NewCommitEndpoint("codemicro", oauthToken))
+
+	log.Panic(app.Listen(":80"))
 }
