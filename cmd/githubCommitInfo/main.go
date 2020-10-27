@@ -13,9 +13,15 @@ import (
 
 func main() {
 	oauthToken := os.Getenv("GITHUB_OAUTH_TOKEN")
+	userName := os.Getenv("GITHUB_USERNAME")
 
 	if oauthToken == "" {
 		fmt.Println("GITHUB_OAUTH_TOKEN envirnoment variable not set.")
+		os.Exit(1)
+	}
+
+	if userName == "" {
+		fmt.Println("GITHUB_USERNAME environment variable not set.")
 		os.Exit(1)
 	}
 
@@ -26,7 +32,7 @@ func main() {
 		},
 	})
 
-	app.Get("/", cache.New(), endpoints.NewCommitEndpoint("codemicro", oauthToken))
+	app.Get("/", cache.New(), endpoints.NewCommitEndpoint(userName, oauthToken))
 
 	log.Panic(app.Listen(":80"))
 }
