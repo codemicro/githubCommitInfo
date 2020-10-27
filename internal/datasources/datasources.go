@@ -2,18 +2,17 @@ package datasources
 
 import (
 	"context"
-	"fmt"
 
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v32/github"
+	"github.com/shurcooL/githubv4"
 )
 
 type GithubClient struct {
-	client *github.Client
+	gqlClient *githubv4.Client
 }
 
-func NewClient(oauthToken string) *GithubClient {
+func NewGithubClient(oauthToken string) *GithubClient {
 
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: oauthToken},
@@ -21,17 +20,37 @@ func NewClient(oauthToken string) *GithubClient {
 	tc := oauth2.NewClient(context.Background(), ts)
 
 	return &GithubClient{
-		client: github.NewClient(tc),
+		gqlClient: githubv4.NewClient(tc),
 	}
 
 }
 
-func (c GithubClient) GetAllCommits(user string) (*int, error) {
-	result, _, err := c.client.Search.Commits(context.Background(), fmt.Sprintf("author:%s ", user), nil)
-	if err != nil {
-		var zero int
-		return &zero, err
+func (c GithubClient) GetAllCommits(user string) (int, error) {
+
+	ctx := context.Background()
+
+	var count int
+
+	// Get commits from GraphQL API
+
+	var query struct {
+		User struct {
+			ContributionsCollection struct {
+				TotalCommitContributions     githubv4.Int
+				RestrictedContributionsCount githubv4.Int
+			}
+		} `graphql:"user(login: $login)"`
+	}
+	queryVars := map[string]interface{}{
+		"login": githubv4.String(user),
 	}
 
-	return result.Total, nil
+	err := c.gqlClient.Query(ctx, &query, queryVars)
+	if err != nil {
+		return count, err
+	}
+
+	count = int(query.User.ContributionsCollection.TotalCommitContributions) + int(query.User.ContributionsCollection.RestrictedContributionsCount)
+
+	return count, nil
 }
