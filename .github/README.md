@@ -23,11 +23,11 @@ $ curl http://127.0.0.1:8000/
   ```
 * Build the Docker image
   ```bash
-  docker build -t commitInfo .
+  docker build -t commitinfo .
   ```
 * Start the Docker container
   ```bash
-  docker run -d --restart unless-stopped -p 8000:80 -e GITHUB_OAUTH_TOKEN="your personal access token" -e GITHUB_USERNAME="codemicro" commitInfo
+  docker run -d --restart unless-stopped -p 8000:80 -e GITHUB_OAUTH_TOKEN="your personal access token" -e GITHUB_USERNAME="codemicro" commitinfo
   ```
   This will start the server on port 8000 of your local machine for the user `codemicro`.
 
