@@ -4,7 +4,7 @@ type ShieldsResponse struct {
 	SchemaVersion int `json:"schemaVersion"`
 	Label string `json:"label"`
 	Message string `json:"message"`
-	Colour string `json:"colour"`
+	Colour string `json:"color"`
 }
 
 func NewShield(label, message, colour string) *ShieldsResponse {
