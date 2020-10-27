@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/codemicro/githubCommitInfo/internal/datasources"
@@ -10,7 +11,7 @@ import (
 
 func NewCommitEndpoint(username, oauthToken string) fiber.Handler {
 	client := datasources.NewGithubClient(oauthToken)
-	fieldName := "Commits"
+	fieldName := fmt.Sprintf("%s's total commits", username)
 
 	return func(c *fiber.Ctx) error {
 		numCommits, err := client.GetAllCommits(username)
