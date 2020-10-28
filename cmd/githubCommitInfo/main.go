@@ -28,7 +28,8 @@ func main() {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			fmt.Println(err)
-			return c.Status(fiber.StatusInternalServerError).JSON(shields.NewShield(c.Locals("fieldName").(string), "Unavailable", "red"))
+			// No HTTP 500 code is set here because that messes with the shields.io service
+			return c.JSON(shields.NewShield(c.Locals("fieldName").(string), "Unavailable", "red"))
 		},
 	})
 

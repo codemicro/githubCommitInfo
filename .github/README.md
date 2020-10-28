@@ -7,7 +7,7 @@ Designed to work as a custom endpoint for [Shields.io](https://shields.io).
 ### Usage
 ```bash
 $ curl http://127.0.0.1:8000/
-{"schemaVersion":1,"label":"Commits","message":"1578","colour":"green"}
+{"schemaVersion":1,"label":"codemicro's total commits","message":"1578","colour":"green"}
 ```
 
 ### Prerequisites
