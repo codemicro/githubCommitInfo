@@ -2,11 +2,14 @@ package datasources
 
 import (
 	"context"
+	"time"
 
 	"golang.org/x/oauth2"
 
 	"github.com/shurcooL/githubv4"
 )
+
+var readFromYear = 2008
 
 type GithubClient struct {
 	gqlClient *githubv4.Client
@@ -29,8 +32,6 @@ func (c GithubClient) GetAllCommits(user string) (int, error) {
 
 	ctx := context.Background()
 
-	var count int
-
 	// Get commits from GraphQL API
 
 	var query struct {
@@ -38,19 +39,34 @@ func (c GithubClient) GetAllCommits(user string) (int, error) {
 			ContributionsCollection struct {
 				TotalCommitContributions     githubv4.Int
 				RestrictedContributionsCount githubv4.Int
-			}
+				EndedAt                      githubv4.DateTime
+			} `graphql:"contributionsCollection(from: $from)"`
 		} `graphql:"user(login: $login)"`
 	}
 	queryVars := map[string]interface{}{
 		"login": githubv4.String(user),
 	}
 
-	err := c.gqlClient.Query(ctx, &query, queryVars)
-	if err != nil {
-		return count, err
-	}
+	var count int
 
-	count = int(query.User.ContributionsCollection.TotalCommitContributions) + int(query.User.ContributionsCollection.RestrictedContributionsCount)
+	stuckReadFrom := readFromYear
+
+	for i := 0; i < time.Now().Year()-stuckReadFrom+1; i++ {
+
+		currentYear := stuckReadFrom + i
+
+		queryVars["from"] = githubv4.DateTime{time.Date(currentYear, time.January, 1, 0, 0, 0, 0, time.UTC)}
+		err := c.gqlClient.Query(ctx, &query, queryVars)
+		if err != nil {
+			return 0, err
+		}
+		count += int(query.User.ContributionsCollection.TotalCommitContributions)
+		count += int(query.User.ContributionsCollection.RestrictedContributionsCount)
+
+		if count == 0 && readFromYear+i >= readFromYear {
+			readFromYear = currentYear
+		}
+	}
 
 	return count, nil
 }
