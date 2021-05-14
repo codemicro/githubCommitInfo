@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/codemicro/githubCommitInfo/internal/endpoints"
 	"github.com/codemicro/githubCommitInfo/internal/shields"
@@ -27,9 +28,13 @@ func main() {
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			fmt.Println(err)
+			fmt.Fprintf(os.Stderr, "ERROR %s: %s", time.Now().Format(time.RFC3339), err.Error())
 			// No HTTP 500 code is set here because that messes with the shields.io service
-			return c.JSON(shields.NewShield(c.Locals("fieldName").(string), "Unavailable", "red"))
+			fieldname := "error"
+			if x := c.Locals("fieldName"); x != nil {
+				fieldname = x.(string)
+			}
+			return c.JSON(shields.NewShield(fieldname, "Unavailable", "red"))
 		},
 	})
 
