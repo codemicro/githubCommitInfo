@@ -16,18 +16,12 @@ $ curl http://127.0.0.1:8000/
 
 ### Setup (Docker)
 
-* Perform one of the following options:
-    * Clone this repository and build the Docker image
-    ```bash
-    git clone https://github.com/codemicro/githubCommitInfo.git
-    cd githubCommitInfo
-    docker build -t commitinfo .
-    ```
-    * Or, provided it's not been removed by the image retention policy, pull a prebuilt image from the Docker Hub.
-    ```bash
-    docker pull codemicro/github-commit-info
-    ```
-    and use the image name `codemicro/github-commit-info` in the next step.
+* Clone this repository and build the Docker image
+  ```bash
+  git clone https://github.com/codemicro/githubCommitInfo.git
+  cd githubCommitInfo
+  docker build -t commitinfo .
+  ```
 * Start the Docker container
   ```bash
   docker run -d --restart unless-stopped -p 8000:80 -e GITHUB_OAUTH_TOKEN="your personal access token" -e GITHUB_USERNAME="codemicro" commitinfo
